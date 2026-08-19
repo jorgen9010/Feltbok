@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FELTBOK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,500&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#26241F;
+    --parchment:#EDE6D6;
+    --parchment-2:#E4DCC7;
+    --forest:#33422F;
+    --forest-light:#4A5D45;
+    --rust:#A85C32;
+    --sage:#8B9A82;
+    --line:#CBBFA0;
+    --card:#F5F0E4;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--parchment);
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px);
+    background-size: 100% 32px;
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  .wrap{max-width:640px;margin:0 auto;padding:0 18px;}
+
+  /* HEADER / COVER */
+  header{
+    padding:28px 0 18px;
+    border-bottom:2px solid var(--ink);
+    margin-bottom:6px;
+    position:relative;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    color:var(--forest-light);
+    display:flex;
+    justify-content:space-between;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:44px;
+    margin:6px 0 2px;
+    letter-spacing:-0.01em;
+    color:var(--ink);
+  }
+  h1 em{color:var(--rust); font-style:italic; font-weight:500;}
+  .subdate{
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+    color:var(--forest-light);
+  }
+  .stamp{
+    position:absolute;
+    right:18px;
+    top:24px;
+    width:76px;height:76px;
+    border-radius:50%;
+    border:2.5px dashed var(--rust);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    transform:rotate(-9deg);
+    opacity:0.25;
+    transition:opacity .3s, transform .3s;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    line-height:1.2;
+    color:var(--rust);
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    padding:6px;
+  }
+  .stamp.filled{opacity:1; transform:rotate(-9deg) scale(1.05);}
+
+  /* TABS */
+  nav.tabs{
+    display:flex;
+    gap:2px;
+    margin:18px 0 0;
+    border-bottom:1px solid var(--line);
+  }
+  nav.tabs button{
+    flex:1;
+    background:transparent;
+    border:none;
+    border-bottom:3px solid transparent;
+    padding:10px 4px 12px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--forest-light);
+    cursor:pointer;
+    opacity:0.55;
+  }
+  nav.tabs button.active{
+    opacity:1;
+    color:var(--ink);
+    border-bottom-color:var(--rust);
+    font-weight:600;
+  }
+
+  section.panel{display:none; padding-top:22px;}
+  section.panel.active{display:block; animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+
+  .group-title{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:19px;
+    color:var(--forest);
+    margin:26px 0 10px;
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+  }
+  .group-title:first-child{margin-top:0;}
+  .group-title small{
+    font-family:'JetBrains Mono',monospace;
+    font-style:normal;
+    font-size:11px;
+    color:var(--sage);
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+  }
+
+  .item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:11px 2px;
+    border-bottom:1px solid var(--line);
+    cursor:pointer;
+    user-select:none;
+  }
+  .item:last-child{border-bottom:none;}
+  .box{
+    width:20px;height:20px;
+    min-width:20px;
+    border:1.5px solid var(--ink);
+    border-radius:3px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--card);
+    transition:background .15s, border-color .15s;
+  }
+  .item.checked .box{background:var(--forest); border-color:var(--forest);}
+  .box svg{width:12px;height:12px; opacity:0; transition:opacity .15s;}
+  .item.checked .box svg{opacity:1;}
+  .item-label{font-size:15px; flex:1; transition:color .15s, opacity .15s;}
+  .item.checked .item-label{color:var(--forest-light); text-decoration:line-through; opacity:0.65;}
+
+  /* TRAINING */
+  .day-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:2px;
+    padding:16px;
+    margin-bottom:14px;
+  }
+  .day-head{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:10px;
+  }
+  .day-name{font-family:'Fraunces',serif; font-weight:600; font-size:17px;}
+  .day-focus{font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--sage); text-transform:uppercase; letter-spacing:.05em;}
+  .day-exercises{font-size:13px; color:var(--forest-light); line-height:1.7; margin-bottom:12px;}
+  .toggle-row{display:flex; gap:8px;}
+  .toggle-btn{
+    flex:1;
+    border:1.5px solid var(--ink);
+    background:transparent;
+    padding:9px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    border-radius:2px;
+    cursor:pointer;
+    color:var(--ink);
+  }
+  .toggle-btn.on{background:var(--forest); color:var(--parchment); border-color:var(--forest);}
+
+  /* GROWTH */
+  .growth-form{
+    background:var(--card);
+    border:1px solid var(--line);
+    padding:16px;
+    margin-bottom:20px;
+  }
+  .type-select{display:flex; gap:6px; margin-bottom:12px;}
+  .type-opt{
+    flex:1; text-align:center;
+    padding:8px 4px;
+    border:1.5px solid var(--line);
+    font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    cursor:pointer;
+    border-radius:2px;
+    color:var(--forest-light);
+  }
+  .type-opt.active{border-color:var(--rust); color:var(--rust); background:#F8EDE4;}
+  input[type=text], input[type=number]{
+    width:100%;
+    font-family:'Work Sans',sans-serif;
+    font-size:14px;
+    padding:10px;
+    border:1px solid var(--line);
+    background:#fff;
+    border-radius:2px;
+    margin-bottom:8px;
+  }
+  .add-btn{
+    width:100%;
+    background:var(--ink);
+    color:var(--parchment);
+    border:none;
+    padding:11px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    border-radius:2px;
+    cursor:pointer;
+  }
+  .stats-row{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+  }
+  .stat-box{
+    flex:1;
+    text-align:center;
+    padding:14px 6px;
+    border:1px solid var(--line);
+    background:var(--card);
+  }
+  .stat-num{font-family:'Fraunces',serif; font-weight:600; font-size:26px; color:var(--rust);}
+  .stat-label{font-family:'JetBrains Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--forest-light); margin-top:2px;}
+
+  .log-entry{
+    display:flex;
+    gap:12px;
+    padding:12px 2px;
+    border-bottom:1px solid var(--line);
+    align-items:flex-start;
+  }
+  .log-tag{
+    font-family:'JetBrains Mono',monospace;
+    font-size:9px;
+    text-transform:uppercase;
+    padding:3px 6px;
+    border:1px solid var(--sage);
+    color:var(--forest);
+    white-space:nowrap;
+    letter-spacing:.03em;
+    margin-top:2px;
+  }
+  .log-body{flex:1;}
+  .log-title{font-size:14px; font-weight:500;}
+  .log-date{font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--sage); margin-top:2px;}
+  .log-del{background:none;border:none;color:var(--line);font-size:16px;cursor:pointer;padding:0 4px;}
+  .log-del:hover{color:var(--rust);}
+  .empty-note{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--sage);
+    text-align:center;
+    padding:30px 10px;
+    font-style:italic;
+  }
+
+  .foot-note{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    color:var(--sage);
+    text-align:center;
+    margin-top:34px;
+    letter-spacing:.04em;
+  }
+
+  .app-tools{
+    display:flex; gap:8px; margin-top:14px; flex-wrap:wrap;
+  }
+  .tool-btn{
+    flex:1; min-width:120px; border:1px solid var(--line);
+    background:var(--card); color:var(--forest); padding:9px 8px;
+    font-family:'JetBrains Mono',monospace; font-size:10px;
+    text-transform:uppercase; letter-spacing:.05em; cursor:pointer;
+    border-radius:2px;
+  }
+  .tool-btn.primary{background:var(--forest);color:var(--parchment);border-color:var(--forest);}
+  .install-note{
+    display:none; margin-top:10px; padding:9px 10px;
+    border:1px dashed var(--rust); color:var(--rust);
+    font-family:'JetBrains Mono',monospace; font-size:10px; line-height:1.4;
+  }
+  .install-note.show{display:block;}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow"><span>JØRGEN · UTVIKLINGSLOGG</span><span id="week-num"></span></div>
+    <h1>FELT<em>bok</em></h1>
+    <div class="subdate" id="today-date"></div>
+    <div class="stamp" id="stamp">FULLFØRT<br><span id="stamp-date"></span></div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="today">I dag</button>
+    <button class="tab-btn" data-tab="training">Trening</button>
+    <button class="tab-btn" data-tab="growth">Vekst</button>
+  </nav>
+
+  <!-- TODAY -->
+  <section class="panel active" id="panel-today">
+    <div class="group-title">Morgen <small>AM</small></div>
+    <div id="list-am"></div>
+
+    <div class="group-title">Kveld <small>PM</small></div>
+    <div id="list-pm"></div>
+
+    <div class="group-title">Holdning <small>10 min</small></div>
+    <div id="list-posture"></div>
+
+    <div class="group-title">Kjeve <small>daglig</small></div>
+    <div id="list-jaw"></div>
+
+    <div class="group-title">Kosttilskudd <small>daglig</small></div>
+    <div id="list-supp"></div>
+  </section>
+
+  <!-- TRAINING -->
+  <section class="panel" id="panel-training">
+    <div class="group-title">Ukeplan <small>4–5x/uke</small></div>
+    <div id="training-days"></div>
+
+    <div class="group-title">Cardio <small>1–2x/uke</small></div>
+    <div class="item" id="cardio-item">
+      <div class="box"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="4,12 9,18 20,6"/></svg></div>
+      <div class="item-label">Zone 2 (jogg / sykkel / gange i motbakke)</div>
+    </div>
+
+    <div class="group-title">Ukentlig sjekk</div>
+    <div class="growth-form">
+      <input type="text" id="weight-input" placeholder="Vekt (kg)">
+      <input type="text" id="pullup-input" placeholder="Pull-ups / push-ups rekord">
+      <textarea id="pain-input" placeholder="Smerte i ledd? Kne / hofte / kjeve..." style="width:100%; font-family:'Work Sans',sans-serif; font-size:14px; padding:10px; border:1px solid var(--line); border-radius:2px; margin-bottom:8px; min-height:60px;"></textarea>
+      <button class="add-btn" id="save-week-btn">Lagre denne ukens sjekk</button>
+    </div>
+    <div id="week-history"></div>
+  </section>
+
+  <!-- GROWTH -->
+  <section class="panel" id="panel-growth">
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-num" id="stat-hours">0</div><div class="stat-label">Timer denne uken</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-books">0</div><div class="stat-label">Bøker totalt</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-exp">0</div><div class="stat-label">Erfaringer</div></div>
+    </div>
+
+    <div class="growth-form">
+      <div class="type-select">
+        <div class="type-opt active" data-type="hours">Arbeidstimer</div>
+        <div class="type-opt" data-type="book">Bok fullført</div>
+        <div class="type-opt" data-type="exp">Ny erfaring</div>
+      </div>
+      <input type="text" id="growth-title" placeholder="Tittel / beskrivelse">
+      <input type="number" id="growth-value" placeholder="Timer" style="display:block;">
+      <button class="add-btn" id="add-growth-btn">Legg til</button>
+    </div>
+
+    <div class="group-title">Logg</div>
+    <div id="growth-list"></div>
+  </section>
+
+
+    <div class="app-tools">
+      <button class="tool-btn primary" id="install-btn" style="display:none;">Installer på hjemskjerm</button>
+      <button class="tool-btn" id="export-btn">Eksporter data</button>
+      <button class="tool-btn" id="import-btn">Importer data</button>
+      <input type="file" id="import-file" accept=".json,application/json" style="display:none;">
+    </div>
+    <div class="install-note" id="install-note"></div>
+  <div class="foot-note">— lagret lokalt på denne enheten —</div>
+</div>
+
+<script>
+const DATA = {
+  am: [
+    {id:'am_cleanse', label:'Skyll ansikt, mild rens'},
+    {id:'am_spf', label:'Fuktighetskrem + SPF'},
+    {id:'am_lip', label:'Leppebalsam m/ SPF'},
+    {id:'am_hair', label:'Hår: vann + leave-in ved behov'},
+    {id:'am_mobility', label:'5 min mobilitet (cat-cow, wall slides)'},
+    {id:'am_protein', label:'Protein til frokost'},
+  ],
+  pm: [
+    {id:'pm_retinoid', label:'Rens + retinoid (man/ons/fre)'},
+    {id:'pm_moist', label:'Fuktighetskrem'},
+    {id:'pm_oil', label:'Hårolje ved behov'},
+    {id:'pm_sleep', label:'Lys av 30 min før leggetid, 7–9t søvn'},
+  ],
+  posture: [
+    {id:'p_wall', label:'Wall slides x15'},
+    {id:'p_band', label:'Band pull-aparts x20'},
+    {id:'p_chin', label:'Chin tucks x10'},
+    {id:'p_pec', label:'Doorway pec stretch 30sek x2'},
+    {id:'p_hang', label:'Dead hang 20–30sek'},
+  ],
+  jaw: [
+    {id:'j_gum', label:'Tyggegummi (sukkerfri) 15–20 min'},
+    {id:'j_resist', label:'Kjeve-resistance: tunge mot gane, 5–10sek x10'},
+  ],
+  supp: [
+    {id:'s_d3', label:'Vitamin D3 (2000–4000 IU)'},
+    {id:'s_omega', label:'Omega-3 (1–2g EPA+DHA)'},
+    {id:'s_mag', label:'Magnesium (300–400mg, kveld)'},
+    {id:'s_zinc', label:'Zink (15–30mg, med mat)'},
+    {id:'s_collagen', label:'Kollagen (10g)'},
+    {id:'s_creatine', label:'Kreatin monohydrat (3–5g)'},
+  ],
+};
+
+const TRAINING_DAYS = [
+  {id:'d1', name:'Dag 1', focus:'Push + Core', ex:'Push-ups · Pike push-ups · DB overhead press · Plank + side plank'},
+  {id:'d2', name:'Dag 2', focus:'Pull + Holdning', ex:'Pull-ups · Inverted rows · DB rows · Band pull-aparts · Dead hangs'},
+  {id:'d3', name:'Dag 3', focus:'Lower + Funksjonell', ex:'Goblet squats · Bulgarian split squats · RDL · Single-leg glute bridge · Farmers carry · Copenhagen plank'},
+  {id:'d4', name:'Dag 4', focus:'Hvile / mobilitet', ex:'Rolig gåtur eller mobilitetsarbeid'},
+  {id:'d5', name:'Dag 5', focus:'Full Body Funksjonell', ex:'Turkish get-ups · KB swings · Push-up til renegade row · Lunges · TKE · Single-leg RDL'},
+];
+
+function todayKey(){
+  const d = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function weekKey(){
+  const d = new Date();
+  const onejan = new Date(d.getFullYear(),0,1);
+  const week = Math.ceil((((d - onejan) / 86400000) + onejan.getDay()+1)/7);
+  return `${d.getFullYear()}-W${week}`;
+}
+
+let dailyChecks = {};
+let trainingState = {};
+let growthEntries = [];
+let selectedType = 'hours';
+
+// --- Local storage layer (standalone version, data stays on this device/browser) ---
+const LS_PREFIX = 'feltbok:';
+function lsGet(key){
+  try{
+    const raw = localStorage.getItem(LS_PREFIX + key);
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+function lsSet(key, value){
+  try{ localStorage.setItem(LS_PREFIX + key, JSON.stringify(value)); }catch(e){}
+}
+
+async function loadAll(){
+  dailyChecks = lsGet('daily:' + todayKey()) || {};
+  trainingState = lsGet('training:' + weekKey()) || {};
+  growthEntries = lsGet('growth-entries') || [];
+  render();
+}
+
+async function saveDaily(){
+  lsSet('daily:' + todayKey(), dailyChecks);
+}
+async function saveTraining(){
+  lsSet('training:' + weekKey(), trainingState);
+}
+async function saveGrowth(){
+  lsSet('growth-entries', growthEntries);
+}
+async function saveWeekHistory(entry){
+  let hist = lsGet('week-history') || [];
+  hist.unshift(entry);
+  hist = hist.slice(0, 12);
+  lsSet('week-history', hist);
+  return hist;
+}
+
+function checkIcon(){
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="4,12 9,18 20,6"/></svg>';
+}
+
+function renderChecklist(containerId, items){
+  const el = document.getElementById(containerId);
+  el.innerHTML = items.map(it => `
+    <div class="item ${dailyChecks[it.id] ? 'checked':''}" data-id="${it.id}">
+      <div class="box">${checkIcon()}</div>
+      <div class="item-label">${it.label}</div>
+    </div>
+  `).join('');
+  el.querySelectorAll('.item').forEach(node=>{
+    node.addEventListener('click', ()=>{
+      const id = node.getAttribute('data-id');
+      dailyChecks[id] = !dailyChecks[id];
+      node.classList.toggle('checked');
+      saveDaily();
+      updateStamp();
+    });
+  });
+}
+
+function updateStamp(){
+  const allItems = [...DATA.am, ...DATA.pm, ...DATA.posture, ...DATA.jaw, ...DATA.supp];
+  const total = allItems.length;
+  const done = allItems.filter(it => dailyChecks[it.id]).length;
+  const stamp = document.getElementById('stamp');
+  if(done === total){
+    stamp.classList.add('filled');
+  } else {
+    stamp.classList.remove('filled');
+  }
+}
+
+function renderTraining(){
+  const el = document.getElementById('training-days');
+  el.innerHTML = TRAINING_DAYS.map(d => `
+    <div class="day-card">
+      <div class="day-head">
+        <div class="day-name">${d.name}</div>
+        <div class="day-focus">${d.focus}</div>
+      </div>
+      <div class="day-exercises">${d.ex}</div>
+      <div class="toggle-row">
+        <button class="toggle-btn ${trainingState[d.id] ? 'on':''}" data-id="${d.id}">
+          ${trainingState[d.id] ? 'Fullført ✓' : 'Marker fullført'}
+        </button>
+      </div>
+    </div>
+  `).join('');
+  el.querySelectorAll('.toggle-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.getAttribute('data-id');
+      trainingState[id] = !trainingState[id];
+      saveTraining();
+      renderTraining();
+    });
+  });
+
+  const cardioItem = document.getElementById('cardio-item');
+  if(trainingState['cardio']) cardioItem.classList.add('checked'); else cardioItem.classList.remove('checked');
+}
+
+document.getElementById('cardio-item').addEventListener('click', function(){
+  trainingState['cardio'] = !trainingState['cardio'];
+  this.classList.toggle('checked');
+  saveTraining();
+});
+
+async function renderWeekHistory(){
+  let hist = lsGet('week-history') || [];
+  const el = document.getElementById('week-history');
+  if(hist.length === 0){
+    el.innerHTML = '<div class="empty-note">Ingen ukentlige sjekker lagret ennå</div>';
+    return;
+  }
+  el.innerHTML = hist.map(h => `
+    <div class="log-entry">
+      <span class="log-tag">Uke</span>
+      <div class="log-body">
+        <div class="log-title">${h.weight ? 'Vekt: '+h.weight+' kg · ' : ''}${h.pullup || ''}</div>
+        ${h.pain ? `<div class="log-date" style="color:var(--rust);">⚠ ${h.pain}</div>` : ''}
+        <div class="log-date">${h.date}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+document.getElementById('save-week-btn').addEventListener('click', async ()=>{
+  const weight = document.getElementById('weight-input').value.trim();
+  const pullup = document.getElementById('pullup-input').value.trim();
+  const pain = document.getElementById('pain-input').value.trim();
+  if(!weight && !pullup && !pain) return;
+  await saveWeekHistory({
+    date: new Date().toLocaleDateString('no-NO', {day:'numeric', month:'short', year:'numeric'}),
+    weight, pullup, pain
+  });
+  document.getElementById('weight-input').value = '';
+  document.getElementById('pullup-input').value = '';
+  document.getElementById('pain-input').value = '';
+  renderWeekHistory();
+});
+
+function typeMeta(t){
+  if(t==='hours') return {tag:'TIMER', unit:'timer'};
+  if(t==='book') return {tag:'BOK', unit:''};
+  return {tag:'ERFARING', unit:''};
+}
+
+function renderGrowth(){
+  // stats
+  const now = new Date();
+  const weekAgo = new Date(now - 7*86400000);
+  const hoursThisWeek = growthEntries
+    .filter(e => e.type==='hours' && new Date(e.date) >= weekAgo)
+    .reduce((s,e)=> s + (parseFloat(e.value)||0), 0);
+  const booksTotal = growthEntries.filter(e=>e.type==='book').length;
+  const expTotal = growthEntries.filter(e=>e.type==='exp').length;
+
+  document.getElementById('stat-hours').textContent = hoursThisWeek;
+  document.getElementById('stat-books').textContent = booksTotal;
+  document.getElementById('stat-exp').textContent = expTotal;
+
+  const el = document.getElementById('growth-list');
+  if(growthEntries.length === 0){
+    el.innerHTML = '<div class="empty-note">Ingen oppføringer ennå — legg til den første over</div>';
+    return;
+  }
+  const sorted = [...growthEntries].sort((a,b)=> new Date(b.date) - new Date(a.date));
+  el.innerHTML = sorted.map(e => {
+    const meta = typeMeta(e.type);
+    const title = e.type === 'hours' ? `${e.value} timer — ${e.title || 'arbeid'}` : e.title;
+    return `
+    <div class="log-entry">
+      <span class="log-tag">${meta.tag}</span>
+      <div class="log-body">
+        <div class="log-title">${title}</div>
+        <div class="log-date">${new Date(e.date).toLocaleDateString('no-NO', {day:'numeric', month:'short', year:'numeric'})}</div>
+      </div>
+      <button class="log-del" data-id="${e.id}">×</button>
+    </div>`;
+  }).join('');
+
+  el.querySelectorAll('.log-del').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.getAttribute('data-id');
+      growthEntries = growthEntries.filter(e => e.id !== id);
+      saveGrowth();
+      renderGrowth();
+    });
+  });
+}
+
+document.querySelectorAll('.type-opt').forEach(opt=>{
+  opt.addEventListener('click', ()=>{
+    document.querySelectorAll('.type-opt').forEach(o=>o.classList.remove('active'));
+    opt.classList.add('active');
+    selectedType = opt.getAttribute('data-type');
+    const valInput = document.getElementById('growth-value');
+    if(selectedType === 'hours'){
+      valInput.style.display = 'block';
+      valInput.placeholder = 'Timer';
+    } else {
+      valInput.style.display = 'none';
+    }
+  });
+});
+
+document.getElementById('add-growth-btn').addEventListener('click', ()=>{
+  const title = document.getElementById('growth-title').value.trim();
+  const value = document.getElementById('growth-value').value.trim();
+  if(!title && selectedType !== 'hours') return;
+  if(selectedType === 'hours' && !value) return;
+  const entry = {
+    id: Date.now().toString(),
+    type: selectedType,
+    title: title,
+    value: value,
+    date: new Date().toISOString()
+  };
+  growthEntries.push(entry);
+  saveGrowth();
+  document.getElementById('growth-title').value = '';
+  document.getElementById('growth-value').value = '';
+  renderGrowth();
+});
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.getAttribute('data-tab')).classList.add('active');
+  });
+});
+
+function render(){
+  renderChecklist('list-am', DATA.am);
+  renderChecklist('list-pm', DATA.pm);
+  renderChecklist('list-posture', DATA.posture);
+  renderChecklist('list-jaw', DATA.jaw);
+  renderChecklist('list-supp', DATA.supp);
+  updateStamp();
+  renderTraining();
+  renderWeekHistory();
+  renderGrowth();
+}
+
+function refreshHeader(){
+  const now = new Date();
+  document.getElementById('today-date').textContent =
+    now.toLocaleDateString('no-NO', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  document.getElementById('stamp-date').textContent =
+    now.toLocaleDateString('no-NO', {day:'numeric', month:'short'});
+  document.getElementById('week-num').textContent = 'UKE ' + getISOWeekNumber(now);
+}
+
+function getISOWeekNumber(date){
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const day = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+
+refreshHeader();
+document.getElementById('growth-value').style.display = 'block';
+loadAll();
+
+let lastDayKey = todayKey();
+let lastWeekKey = weekKey();
+setInterval(() => {
+  const currentDay = todayKey();
+  const currentWeek = weekKey();
+  if(currentDay !== lastDayKey || currentWeek !== lastWeekKey){
+    lastDayKey = currentDay;
+    lastWeekKey = currentWeek;
+    refreshHeader();
+    loadAll();
+  }
+}, 30000);
+
+document.addEventListener('visibilitychange', () => {
+  if(!document.hidden){
+    refreshHeader();
+    if(todayKey() !== lastDayKey || weekKey() !== lastWeekKey){
+      lastDayKey = todayKey();
+      lastWeekKey = weekKey();
+      loadAll();
+    }
+  }
+});
+
+// --- PWA installation + backup ---
+let deferredInstallPrompt = null;
+const installBtn = document.getElementById('install-btn');
+const installNote = document.getElementById('install-note');
+
+window.addEventListener('beforeinstallprompt', (event) => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  installBtn.style.display = 'block';
+  installNote.classList.add('show');
+  installNote.textContent = 'Trykk «Installer på hjemskjerm» for å gjøre FELTbok til en app.';
+});
+
+installBtn.addEventListener('click', async () => {
+  if(!deferredInstallPrompt){
+    installNote.classList.add('show');
+    installNote.textContent = 'På iPhone: åpne FELTbok i Safari → Del → Legg til på Hjem-skjerm.';
+    return;
+  }
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  installBtn.style.display = 'none';
+});
+
+window.addEventListener('appinstalled', () => {
+  installBtn.style.display = 'none';
+  installNote.classList.remove('show');
+});
+
+document.getElementById('export-btn').addEventListener('click', () => {
+  const keys = [];
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(k && k.startsWith(LS_PREFIX)) keys.push(k);
+  }
+  const data = {};
+  keys.forEach(k => {
+    try { data[k] = JSON.parse(localStorage.getItem(k)); }
+    catch(e) { data[k] = localStorage.getItem(k); }
+  });
+  const blob = new Blob([JSON.stringify({
+    app:'FELTbok',
+    version:1,
+    exportedAt:new Date().toISOString(),
+    data
+  }, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'feltbok-backup-' + todayKey() + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('import-btn').addEventListener('click', () => {
+  document.getElementById('import-file').click();
+});
+
+document.getElementById('import-file').addEventListener('change', async (event) => {
+  const file = event.target.files[0];
+  if(!file) return;
+  try{
+    const backup = JSON.parse(await file.text());
+    if(!backup || backup.app !== 'FELTbok' || !backup.data) throw new Error('Ugyldig FELTbok-backup');
+    if(!confirm('Importer backup? Dette erstatter FELTbok-data som finnes på denne enheten.')) return;
+    Object.entries(backup.data).forEach(([key,value]) => {
+      if(key.startsWith(LS_PREFIX)) localStorage.setItem(key, JSON.stringify(value));
+    });
+    alert('Backup importert. FELTbok lastes på nytt.');
+    location.reload();
+  }catch(err){
+    alert('Kunne ikke importere backup.');
+  }finally{
+    event.target.value = '';
+  }
+});
+
+if('serviceWorker' in navigator && location.protocol !== 'file:'){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+
+</script>
+</body>
+</html>
